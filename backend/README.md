@@ -4,17 +4,21 @@ Django 5 + DRF backend for the DeptDesk ERP frontend (Zeal Polytechnic).
 
 ## Apps
 
-| App           | Resource(s)                          |
-|---------------|--------------------------------------|
-| `accounts`    | Custom `User`, JWT login, `/users/`  |
-| `departments` | `/departments/`                      |
-| `subjects`    | `/subjects/`                         |
-| `faculty`     | `/faculty/`                          |
-| `students`    | `/students/`                         |
-| `attendance`  | `/attendance/` + bulk/recent/trend   |
-| `results`     | `/results/`                          |
-| `timetable`   | `/timetable/` + by-class actions     |
-| `notices`     | `/notices/`                          |
+| App                 | Resource(s)                                |
+|---------------------|--------------------------------------------|
+| `accounts`          | Custom `User`, JWT login, `/users/`        |
+| `departments`       | `/departments/` (lookup by `code`)         |
+| `subjects`          | `/subjects/` (lookup by `code`)            |
+| `faculty`           | `/faculty/`                                |
+| `students`          | `/students/`                               |
+| `classes`           | `/classes/`                                |
+| `attendance`        | `/attendance/` + bulk/recent/trend         |
+| `results`           | `/results/`                                |
+| `timetable`         | `/timetable/` + by-class actions           |
+| `notices`           | `/notices/`                                |
+| `practical_manuals` | `/practical-manuals/` (file upload)        |
+| `project_marks`     | `/project-marks/`                          |
+| analytics           | `GET /api/analytics/overview/`             |
 
 ## Quick start
 
@@ -23,11 +27,19 @@ cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-python manage.py makemigrations accounts departments subjects faculty students attendance results timetable notices
+python manage.py makemigrations \
+  accounts departments subjects faculty students classes \
+  attendance results timetable notices practical_manuals project_marks
 python manage.py migrate
-python manage.py createsuperuser
+python manage.py createsuperuser   # use email + a password
 python manage.py runserver 0.0.0.0:8000
 ```
+
+Frontend env: `VITE_API_BASE_URL=http://localhost:8000/api`
+
+Uploaded practical-manual files are stored under `backend/media/` and
+served at `/media/...` while `DEBUG=1`.
+
 
 Frontend env: `VITE_API_BASE_URL=http://localhost:8000/api`
 
