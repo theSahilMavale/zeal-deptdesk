@@ -3,21 +3,30 @@
  * Keep in sync with the backend `serializers.py` definitions.
  */
 
+export type Role = "admin" | "faculty" | "student";
+
 export interface Department {
-  id: string;
+  id?: number;
+  code: string;
   name: string;
-  hod: string;
-  faculty: number;
-  students: number;
+  hod: string | null;
+  hod_name?: string;
+  established?: string | null;
+  description?: string;
+  faculty?: number;
+  students?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ClassSection {
   id: string;
   name: string;
   dept: string;
-  year: string;
+  year: "FY" | "SY" | "TY" | string;
   students: number;
-  mentor: string;
+  mentor: string | null;
+  mentor_name?: string;
 }
 
 export interface Subject {
@@ -26,7 +35,7 @@ export interface Subject {
   dept: string;
   sem: number;
   credits: number;
-  type: string;
+  type: "Theory" | "Practical" | "Project" | "Elective" | string;
 }
 
 export interface Student {
@@ -36,7 +45,7 @@ export interface Student {
   phone: string;
   class: string;
   dept: string;
-  year: string;
+  year: "FY" | "SY" | "TY" | string;
   cgpa: string | number;
   attendance: number;
 }
@@ -45,28 +54,39 @@ export interface Faculty {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   dept: string;
   designation: string;
   subjects: string[];
   experience: number;
+  user?: number | null;
 }
 
 export interface AppUser {
-  id: string;
-  name: string;
+  id: number;
+  username: string;
   email: string;
-  role: "Admin" | "Faculty" | "Student" | string;
-  status: "Active" | "Inactive" | string;
+  first_name?: string;
+  last_name?: string;
+  name?: string;
+  role: Role | string;
+  phone?: string;
+  is_active: boolean;
+  password?: string;
 }
 
 export interface AttendanceRecord {
-  id?: string | number;
+  id?: number;
   student_id?: string;
+  student?: string;
   name?: string;
-  class?: string;
-  status: "Present" | "Absent" | string;
-  date: string;
+  student_class?: string;
   subject: string;
+  faculty?: string | null;
+  date: string;
+  status: "Present" | "Absent" | "Late" | "Leave" | string;
+  remarks?: string;
+  created_at?: string;
 }
 
 export interface AttendanceTrendPoint {
@@ -74,68 +94,91 @@ export interface AttendanceTrendPoint {
   present: number;
 }
 
-export interface DeptEnrollmentPoint {
-  name: string;
-  students: number;
-}
-
 export interface ResultRow {
-  id: string;
-  name: string;
-  class: string;
-  os: number;
-  se: number;
-  ajp: number;
-  total: number;
+  id?: number;
+  student: string;
+  student_name?: string;
+  subject: string;
+  subject_name?: string;
+  semester: number;
+  internal: number | string;
+  external: number | string;
+  total?: number | string;
   grade: string;
+  published: boolean;
 }
 
 export interface PracticalManual {
   id: string;
-  subject: string;
   title: string;
+  subject: string;
+  subject_name?: string;
   dept: string;
   sem: number;
   status: "Published" | "Draft" | "Review" | string;
+  file?: string | null;
+  file_url?: string | null;
+  description?: string;
 }
 
 export interface ProjectMark {
   id: string;
-  team: string;
   title: string;
-  guide: string;
+  team: string;
+  guide: string | null;
+  guide_name?: string;
   internal: number;
   external: number;
-  status: string;
+  total?: number;
+  status: "In Progress" | "Submitted" | "Evaluated" | string;
 }
 
-export interface TimetableRow {
-  time: string;
-  mon: string;
-  tue: string;
-  wed: string;
-  thu: string;
-  fri: string;
-  sat: string;
+export interface TimetableEntry {
+  id?: number;
+  class_code: string;
+  day: number;
+  day_name?: string;
+  start_time: string;
+  end_time: string;
+  subject: string | null;
+  subject_name?: string;
+  faculty: string | null;
+  faculty_name?: string;
+  room?: string;
+  label?: string;
 }
 
 export interface Notice {
-  id: string;
+  id?: number;
   title: string;
+  body: string;
   category: string;
-  date: string;
-  author: string;
+  audience: string;
+  department?: string | null;
+  author?: number | null;
+  author_name?: string;
+  author_username?: string;
   pinned: boolean;
+  date?: string;
+  published_at?: string;
+}
+
+export interface OverviewStats {
+  totals: { students: number; faculty: number; departments: number; subjects: number };
+  attendance_today_pct: number;
 }
 
 export interface LoginResponse {
   access: string;
   refresh: string;
   user: {
-    id: string;
-    name: string;
+    id: number;
+    username: string;
     email: string;
-    role: "admin" | "faculty" | "student";
-    department?: string;
+    first_name?: string;
+    last_name?: string;
+    name?: string;
+    role: Role;
+    phone?: string;
   };
 }

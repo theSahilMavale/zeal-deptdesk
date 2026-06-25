@@ -41,7 +41,7 @@ function ProfilePage() {
               <Phone className="h-4 w-4" /> +91 98220 12345
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
-              <Building2 className="h-4 w-4" /> {user.department}
+              <Building2 className="h-4 w-4" /> Zeal Polytechnic
             </div>
             <div className="flex items-center gap-3 text-muted-foreground">
               <MapPin className="h-4 w-4" /> Zeal Polytechnic, Pune
@@ -56,7 +56,7 @@ function ProfilePage() {
               ["Full Name", user.name],
               ["Email", user.email],
               ["Role", user.role[0].toUpperCase() + user.role.slice(1)],
-              ["Department", user.department ?? "—"],
+              ["Username", user.username],
               ["Employee / Roll No", user.id],
               ["Joined", "Aug 2023"],
             ].map(([k, v]) => (

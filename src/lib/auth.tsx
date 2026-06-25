@@ -1,128 +1,100 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { authService } from "@/lib/api/services/auth";
+import { getAccessToken, clearTokens } from "@/lib/api/client";
 
 export type Role = "admin" | "faculty" | "student";
 
 export interface AuthUser {
-  id: string;
+  id: number;
+  username: string;
   name: string;
   email: string;
   role: Role;
-  department?: string;
-  avatar?: string;
+  phone?: string;
 }
 
 interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<AuthUser>;
-  logout: () => void;
+  login: (identifier: string, password: string) => Promise<AuthUser>;
+  logout: () => Promise<void>;
+  refresh: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const STORAGE_KEY = "deptdesk.user";
-
-// Demo account registry. The role is derived from the matched credential
-// record — never from a client-supplied dropdown — so a user cannot
-// self-elevate to admin by changing form state or localStorage.
-interface DemoAccount extends AuthUser {
-  password: string;
-}
-
-const DEMO_ACCOUNTS: DemoAccount[] = [
-  {
-    id: "u-admin",
-    name: "Dr. Anil Kulkarni",
-    email: "admin@zealpoly.edu",
-    role: "admin",
-    department: "Administration",
-    password: "admin@123",
-  },
-  {
-    id: "u-fac",
-    name: "Prof. Sneha Deshpande",
-    email: "sneha@zealpoly.edu",
-    role: "faculty",
-    department: "Computer Engineering",
-    password: "faculty@123",
-  },
-  {
-    id: "u-stu",
-    name: "Rohan Patil",
-    email: "rohan@zealpoly.edu",
-    role: "student",
-    department: "Computer Engineering",
-    password: "student@123",
-  },
-];
-
-const VALID_ROLES: Role[] = ["admin", "faculty", "student"];
-
-function sanitizeStoredUser(raw: string): AuthUser | null {
-  try {
-    const parsed = JSON.parse(raw) as Partial<AuthUser> & { role?: unknown };
-    if (!parsed || typeof parsed !== "object") return null;
-    if (typeof parsed.id !== "string" || typeof parsed.email !== "string") return null;
-    // Re-derive the canonical record from the demo registry so that a tampered
-    // localStorage role (e.g. user editing JSON to "admin") cannot grant access.
-    const canonical = DEMO_ACCOUNTS.find(
-      (a) => a.id === parsed.id && a.email.toLowerCase() === (parsed.email as string).toLowerCase(),
-    );
-    if (!canonical) return null;
-    if (!VALID_ROLES.includes(canonical.role)) return null;
-    const { password: _pw, ...safe } = canonical;
-    void _pw;
-    return safe;
-  } catch {
-    return null;
-  }
+function normalizeUser(raw: any): AuthUser | null {
+  if (!raw || typeof raw !== "object") return null;
+  const role: Role = raw.role === "admin" || raw.role === "faculty" || raw.role === "student"
+    ? raw.role
+    : "student";
+  const name =
+    raw.name?.toString().trim() ||
+    `${raw.first_name ?? ""} ${raw.last_name ?? ""}`.trim() ||
+    raw.username ||
+    raw.email ||
+    "User";
+  return {
+    id: Number(raw.id),
+    username: String(raw.username ?? raw.email ?? ""),
+    email: String(raw.email ?? ""),
+    name,
+    role,
+    phone: raw.phone ?? undefined,
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-      const restored = raw ? sanitizeStoredUser(raw) : null;
-      if (restored) {
-        setUser(restored);
-      } else if (raw) {
-        // Tampered or stale session — clear it.
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    } catch {
-      /* noop */
+  const hydrate = useCallback(async () => {
+    if (typeof window === "undefined") {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+    const token = getAccessToken();
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+    try {
+      const me = await authService.me();
+      setUser(normalizeUser(me));
+    } catch {
+      clearTokens();
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const normalized = email.trim().toLowerCase();
-    if (!normalized || !password) {
-      throw new Error("Email and password are required.");
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
+  const login = async (identifier: string, password: string) => {
+    if (!identifier || !password) {
+      throw new Error("Email/username and password are required.");
     }
-    const match = DEMO_ACCOUNTS.find(
-      (a) => a.email.toLowerCase() === normalized && a.password === password,
-    );
-    if (!match) {
-      throw new Error("Invalid email or password.");
-    }
-    const { password: _pw, ...safe } = match;
-    void _pw;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
-    setUser(safe);
-    return safe;
+    const resp = await authService.login(identifier.trim(), password);
+    const u = normalizeUser(resp.user);
+    if (!u) throw new Error("Login failed.");
+    setUser(u);
+    return u;
   };
 
-  const logout = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setUser(null);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } finally {
+      setUser(null);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, refresh: hydrate }}>
       {children}
     </AuthContext.Provider>
   );
@@ -135,10 +107,7 @@ export function useAuth() {
 }
 
 /**
- * Gate a route subtree to a set of roles. Returns the fallback (or null)
- * when the current user is missing or not permitted. The role is read from
- * the in-memory auth context — which is itself derived from the verified
- * demo registry — so editing localStorage cannot bypass this check.
+ * Gate a route subtree to a set of roles.
  */
 export function RequireRole({
   roles,
