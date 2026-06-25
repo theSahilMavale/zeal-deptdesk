@@ -13,6 +13,13 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { useState as useStateMounted } from "react";
+
+function ClientOnly({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useStateMounted(false);
+  useEffect(() => setMounted(true), []);
+  return mounted ? <>{children}</> : null;
+}
 
 function NotFoundComponent() {
   return (
