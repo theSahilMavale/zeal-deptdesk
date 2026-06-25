@@ -10,8 +10,9 @@ import { useAuth } from "@/lib/auth";
 import { Card, PageHeader } from "@/components/page-shell";
 import { Badge } from "@/components/data-table";
 import {
-  DEPARTMENTS, STUDENTS, FACULTY, SUBJECTS, ATTENDANCE_TREND, DEPT_ENROLLMENT, NOTICES,
-} from "@/lib/mock-data";
+  useOverview, useAttendanceTrend, noticesHooks, departmentsHooks,
+} from "@/lib/api";
+import type { Department, Notice } from "@/lib/api/types";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — DeptDesk ERP" }] }),
@@ -50,17 +51,25 @@ const PIE_COLORS = ["var(--primary)", "var(--primary-glow)", "var(--success)", "
 
 function Dashboard() {
   const { user } = useAuth();
-  const greeting = `Welcome back, ${user?.name.split(" ").slice(-1)[0]}`;
+  const greeting = `Welcome back, ${user?.name.split(" ").slice(-1)[0] ?? ""}`;
+
+  const { data: overview } = useOverview();
+  const { data: trend = [] } = useAttendanceTrend({ weeks: 8 });
+  const { data: notices = [] } = noticesHooks.useList();
+  const { data: depts = [] } = departmentsHooks.useList();
+
+  const totals = overview?.totals ?? { students: 0, faculty: 0, departments: 0, subjects: 0 };
+  const enrollment = (depts as Department[]).map((d) => ({ name: d.code, students: d.students ?? 0 }));
 
   return (
     <div>
       <PageHeader title={greeting} description="Here's what's happening at Zeal Polytechnic today." />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="Total Students" value={STUDENTS.length * 78} delta="+4.2% MoM" icon={GraduationCap} tone="primary" />
-        <Stat label="Faculty" value={FACULTY.length * 11} delta="+1.1%" icon={UsersIcon} tone="info" />
-        <Stat label="Departments" value={DEPARTMENTS.length} icon={Building2} tone="success" />
-        <Stat label="Active Subjects" value={SUBJECTS.length * 6} delta="+8 new" icon={BookOpen} tone="warning" />
+        <Stat label="Total Students" value={totals.students} icon={GraduationCap} tone="primary" />
+        <Stat label="Faculty" value={totals.faculty} icon={UsersIcon} tone="info" />
+        <Stat label="Departments" value={totals.departments} icon={Building2} tone="success" />
+        <Stat label="Active Subjects" value={totals.subjects} icon={BookOpen} tone="warning" />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -68,13 +77,13 @@ function Dashboard() {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h3 className="text-base font-semibold text-foreground">Attendance Trend</h3>
-              <p className="text-xs text-muted-foreground">Weekly average across departments</p>
+              <p className="text-xs text-muted-foreground">Weekly present count</p>
             </div>
             <Badge tone="info">Last 8 weeks</Badge>
           </div>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={ATTENDANCE_TREND}>
+              <AreaChart data={trend}>
                 <defs>
                   <linearGradient id="att" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.4} />
@@ -83,7 +92,7 @@ function Dashboard() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="week" stroke="var(--muted-foreground)" fontSize={12} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={12} domain={[60, 100]} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={12} />
                 <Tooltip
                   contentStyle={{
                     background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12,
@@ -104,7 +113,7 @@ function Dashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={DEPT_ENROLLMENT}
+                  data={enrollment}
                   dataKey="students"
                   nameKey="name"
                   cx="50%"
@@ -113,7 +122,7 @@ function Dashboard() {
                   outerRadius={90}
                   paddingAngle={3}
                 >
-                  {DEPT_ENROLLMENT.map((_, i) => (
+                  {enrollment.map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                   ))}
                 </Pie>
@@ -128,17 +137,17 @@ function Dashboard() {
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <div className="mb-4">
-            <h3 className="text-base font-semibold text-foreground">Department Performance</h3>
-            <p className="text-xs text-muted-foreground">Average pass percentage this semester</p>
+            <h3 className="text-base font-semibold text-foreground">Faculty by Department</h3>
+            <p className="text-xs text-muted-foreground">Active teaching staff distribution</p>
           </div>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={DEPARTMENTS.map((d) => ({ name: d.id, pass: 65 + Math.round(Math.random() * 30) }))}>
+              <BarChart data={(depts as Department[]).map((d) => ({ name: d.code, faculty: d.faculty ?? 0 }))}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={12} />
                 <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12 }} />
-                <Bar dataKey="pass" fill="var(--primary)" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="faculty" fill="var(--primary)" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -150,18 +159,21 @@ function Dashboard() {
             <Megaphone className="h-4 w-4 text-muted-foreground" />
           </div>
           <ul className="space-y-3">
-            {NOTICES.slice(0, 5).map((n) => (
+            {(notices as Notice[]).slice(0, 5).map((n) => (
               <li key={n.id} className="flex gap-3 rounded-lg p-2 transition-colors hover:bg-accent/40">
                 <div className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium text-foreground">{n.title}</div>
                   <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
                     <Calendar className="h-3 w-3" />
-                    {n.date} · {n.category}
+                    {(n.date || n.published_at || "").slice(0, 10)} · {n.category}
                   </div>
                 </div>
               </li>
             ))}
+            {(notices as Notice[]).length === 0 && (
+              <li className="text-xs text-muted-foreground">No notices yet.</li>
+            )}
           </ul>
         </Card>
       </div>
@@ -169,31 +181,17 @@ function Dashboard() {
       <Card className="mt-6">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-base font-semibold text-foreground">Recent Activity</h3>
-            <p className="text-xs text-muted-foreground">Live updates from across the institute</p>
+            <h3 className="text-base font-semibold text-foreground">System Overview</h3>
+            <p className="text-xs text-muted-foreground">Live counts from the backend</p>
           </div>
           <Activity className="h-4 w-4 text-muted-foreground" />
         </div>
-        <ul className="divide-y divide-border">
-          {[
-            { who: "Prof. Sneha Deshpande", what: "marked attendance for CO5I — Operating Systems", when: "5 min ago" },
-            { who: "Exam Cell", what: "published mid-semester schedule", when: "2 hours ago" },
-            { who: "Rohan Patil", what: "submitted Project Synopsis: Smart Attendance System", when: "Today, 10:14 AM" },
-            { who: "Dr. P. Kale", what: "approved practical manual: Memory Management Simulation", when: "Yesterday" },
-            { who: "T&P Cell", what: "opened registration for TCS Industrial Visit", when: "2 days ago" },
-          ].map((a, i) => (
-            <li key={i} className="flex items-center gap-3 py-3 text-sm">
-              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                {a.who.split(" ").map((w) => w[0]).slice(0, 2).join("")}
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="font-medium text-foreground">{a.who}</span>{" "}
-                <span className="text-muted-foreground">{a.what}</span>
-              </div>
-              <div className="shrink-0 text-xs text-muted-foreground">{a.when}</div>
-            </li>
-          ))}
-        </ul>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <Stat label="Students" value={totals.students} icon={GraduationCap} tone="primary" />
+          <Stat label="Faculty" value={totals.faculty} icon={UsersIcon} tone="info" />
+          <Stat label="Departments" value={totals.departments} icon={Building2} tone="success" />
+          <Stat label="Subjects" value={totals.subjects} icon={BookOpen} tone="warning" />
+        </div>
       </Card>
     </div>
   );
