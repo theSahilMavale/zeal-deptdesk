@@ -83,9 +83,7 @@ export const practicalManualsService = {
       if (v !== undefined && v !== null) form.append(k, String(v));
     });
     if (file) form.append("file", file);
-    const { data } = await apiClient.post<PracticalManual>("/practical-manuals/", form, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const { data } = await apiClient.post<PracticalManual>("/practical-manuals/", form);
     return data;
   },
 
@@ -95,9 +93,7 @@ export const practicalManualsService = {
       if (v !== undefined && v !== null) form.append(k, String(v));
     });
     if (file) form.append("file", file);
-    const { data } = await apiClient.patch<PracticalManual>(`/practical-manuals/${id}/`, form, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const { data } = await apiClient.patch<PracticalManual>(`/practical-manuals/${id}/`, form);
     return data;
   },
 };
