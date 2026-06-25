@@ -9,38 +9,260 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated.users'
+import { Route as AuthenticatedTimetableRouteImport } from './routes/_authenticated.timetable'
+import { Route as AuthenticatedSubjectsRouteImport } from './routes/_authenticated.subjects'
+import { Route as AuthenticatedStudentsRouteImport } from './routes/_authenticated.students'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated.settings'
+import { Route as AuthenticatedResultsRouteImport } from './routes/_authenticated.results'
+import { Route as AuthenticatedProjectMarksRouteImport } from './routes/_authenticated.project-marks'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
+import { Route as AuthenticatedPracticalManualsRouteImport } from './routes/_authenticated.practical-manuals'
+import { Route as AuthenticatedNoticesRouteImport } from './routes/_authenticated.notices'
+import { Route as AuthenticatedFacultyRouteImport } from './routes/_authenticated.faculty'
+import { Route as AuthenticatedDepartmentsRouteImport } from './routes/_authenticated.departments'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated.dashboard'
+import { Route as AuthenticatedClassesRouteImport } from './routes/_authenticated.classes'
+import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authenticated.attendance'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTimetableRoute = AuthenticatedTimetableRouteImport.update({
+  id: '/timetable',
+  path: '/timetable',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSubjectsRoute = AuthenticatedSubjectsRouteImport.update({
+  id: '/subjects',
+  path: '/subjects',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedStudentsRoute = AuthenticatedStudentsRouteImport.update({
+  id: '/students',
+  path: '/students',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedResultsRoute = AuthenticatedResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedProjectMarksRoute =
+  AuthenticatedProjectMarksRouteImport.update({
+    id: '/project-marks',
+    path: '/project-marks',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPracticalManualsRoute =
+  AuthenticatedPracticalManualsRouteImport.update({
+    id: '/practical-manuals',
+    path: '/practical-manuals',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedNoticesRoute = AuthenticatedNoticesRouteImport.update({
+  id: '/notices',
+  path: '/notices',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFacultyRoute = AuthenticatedFacultyRouteImport.update({
+  id: '/faculty',
+  path: '/faculty',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedDepartmentsRoute =
+  AuthenticatedDepartmentsRouteImport.update({
+    id: '/departments',
+    path: '/departments',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedClassesRoute = AuthenticatedClassesRouteImport.update({
+  id: '/classes',
+  path: '/classes',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAttendanceRoute = AuthenticatedAttendanceRouteImport.update({
+  id: '/attendance',
+  path: '/attendance',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/attendance': typeof AuthenticatedAttendanceRoute
+  '/classes': typeof AuthenticatedClassesRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/departments': typeof AuthenticatedDepartmentsRoute
+  '/faculty': typeof AuthenticatedFacultyRoute
+  '/notices': typeof AuthenticatedNoticesRoute
+  '/practical-manuals': typeof AuthenticatedPracticalManualsRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/project-marks': typeof AuthenticatedProjectMarksRoute
+  '/results': typeof AuthenticatedResultsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/students': typeof AuthenticatedStudentsRoute
+  '/subjects': typeof AuthenticatedSubjectsRoute
+  '/timetable': typeof AuthenticatedTimetableRoute
+  '/users': typeof AuthenticatedUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/attendance': typeof AuthenticatedAttendanceRoute
+  '/classes': typeof AuthenticatedClassesRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/departments': typeof AuthenticatedDepartmentsRoute
+  '/faculty': typeof AuthenticatedFacultyRoute
+  '/notices': typeof AuthenticatedNoticesRoute
+  '/practical-manuals': typeof AuthenticatedPracticalManualsRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/project-marks': typeof AuthenticatedProjectMarksRoute
+  '/results': typeof AuthenticatedResultsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/students': typeof AuthenticatedStudentsRoute
+  '/subjects': typeof AuthenticatedSubjectsRoute
+  '/timetable': typeof AuthenticatedTimetableRoute
+  '/users': typeof AuthenticatedUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/attendance': typeof AuthenticatedAttendanceRoute
+  '/_authenticated/classes': typeof AuthenticatedClassesRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/departments': typeof AuthenticatedDepartmentsRoute
+  '/_authenticated/faculty': typeof AuthenticatedFacultyRoute
+  '/_authenticated/notices': typeof AuthenticatedNoticesRoute
+  '/_authenticated/practical-manuals': typeof AuthenticatedPracticalManualsRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/project-marks': typeof AuthenticatedProjectMarksRoute
+  '/_authenticated/results': typeof AuthenticatedResultsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/students': typeof AuthenticatedStudentsRoute
+  '/_authenticated/subjects': typeof AuthenticatedSubjectsRoute
+  '/_authenticated/timetable': typeof AuthenticatedTimetableRoute
+  '/_authenticated/users': typeof AuthenticatedUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/attendance'
+    | '/classes'
+    | '/dashboard'
+    | '/departments'
+    | '/faculty'
+    | '/notices'
+    | '/practical-manuals'
+    | '/profile'
+    | '/project-marks'
+    | '/results'
+    | '/settings'
+    | '/students'
+    | '/subjects'
+    | '/timetable'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/attendance'
+    | '/classes'
+    | '/dashboard'
+    | '/departments'
+    | '/faculty'
+    | '/notices'
+    | '/practical-manuals'
+    | '/profile'
+    | '/project-marks'
+    | '/results'
+    | '/settings'
+    | '/students'
+    | '/subjects'
+    | '/timetable'
+    | '/users'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/attendance'
+    | '/_authenticated/classes'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/departments'
+    | '/_authenticated/faculty'
+    | '/_authenticated/notices'
+    | '/_authenticated/practical-manuals'
+    | '/_authenticated/profile'
+    | '/_authenticated/project-marks'
+    | '/_authenticated/results'
+    | '/_authenticated/settings'
+    | '/_authenticated/students'
+    | '/_authenticated/subjects'
+    | '/_authenticated/timetable'
+    | '/_authenticated/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +270,159 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/users': {
+      id: '/_authenticated/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AuthenticatedUsersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/timetable': {
+      id: '/_authenticated/timetable'
+      path: '/timetable'
+      fullPath: '/timetable'
+      preLoaderRoute: typeof AuthenticatedTimetableRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/subjects': {
+      id: '/_authenticated/subjects'
+      path: '/subjects'
+      fullPath: '/subjects'
+      preLoaderRoute: typeof AuthenticatedSubjectsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/students': {
+      id: '/_authenticated/students'
+      path: '/students'
+      fullPath: '/students'
+      preLoaderRoute: typeof AuthenticatedStudentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/results': {
+      id: '/_authenticated/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof AuthenticatedResultsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/project-marks': {
+      id: '/_authenticated/project-marks'
+      path: '/project-marks'
+      fullPath: '/project-marks'
+      preLoaderRoute: typeof AuthenticatedProjectMarksRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/practical-manuals': {
+      id: '/_authenticated/practical-manuals'
+      path: '/practical-manuals'
+      fullPath: '/practical-manuals'
+      preLoaderRoute: typeof AuthenticatedPracticalManualsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/notices': {
+      id: '/_authenticated/notices'
+      path: '/notices'
+      fullPath: '/notices'
+      preLoaderRoute: typeof AuthenticatedNoticesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/faculty': {
+      id: '/_authenticated/faculty'
+      path: '/faculty'
+      fullPath: '/faculty'
+      preLoaderRoute: typeof AuthenticatedFacultyRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/departments': {
+      id: '/_authenticated/departments'
+      path: '/departments'
+      fullPath: '/departments'
+      preLoaderRoute: typeof AuthenticatedDepartmentsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/classes': {
+      id: '/_authenticated/classes'
+      path: '/classes'
+      fullPath: '/classes'
+      preLoaderRoute: typeof AuthenticatedClassesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/attendance': {
+      id: '/_authenticated/attendance'
+      path: '/attendance'
+      fullPath: '/attendance'
+      preLoaderRoute: typeof AuthenticatedAttendanceRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedAttendanceRoute: typeof AuthenticatedAttendanceRoute
+  AuthenticatedClassesRoute: typeof AuthenticatedClassesRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDepartmentsRoute: typeof AuthenticatedDepartmentsRoute
+  AuthenticatedFacultyRoute: typeof AuthenticatedFacultyRoute
+  AuthenticatedNoticesRoute: typeof AuthenticatedNoticesRoute
+  AuthenticatedPracticalManualsRoute: typeof AuthenticatedPracticalManualsRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedProjectMarksRoute: typeof AuthenticatedProjectMarksRoute
+  AuthenticatedResultsRoute: typeof AuthenticatedResultsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedStudentsRoute: typeof AuthenticatedStudentsRoute
+  AuthenticatedSubjectsRoute: typeof AuthenticatedSubjectsRoute
+  AuthenticatedTimetableRoute: typeof AuthenticatedTimetableRoute
+  AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAttendanceRoute: AuthenticatedAttendanceRoute,
+  AuthenticatedClassesRoute: AuthenticatedClassesRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDepartmentsRoute: AuthenticatedDepartmentsRoute,
+  AuthenticatedFacultyRoute: AuthenticatedFacultyRoute,
+  AuthenticatedNoticesRoute: AuthenticatedNoticesRoute,
+  AuthenticatedPracticalManualsRoute: AuthenticatedPracticalManualsRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedProjectMarksRoute: AuthenticatedProjectMarksRoute,
+  AuthenticatedResultsRoute: AuthenticatedResultsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedStudentsRoute: AuthenticatedStudentsRoute,
+  AuthenticatedSubjectsRoute: AuthenticatedSubjectsRoute,
+  AuthenticatedTimetableRoute: AuthenticatedTimetableRoute,
+  AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
