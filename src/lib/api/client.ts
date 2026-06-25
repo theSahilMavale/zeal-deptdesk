@@ -38,7 +38,7 @@ export function clearTokens() {
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
-  headers: { "Content-Type": "application/json", Accept: "application/json" },
+  headers: { Accept: "application/json" },
 });
 
 apiClient.interceptors.request.use((config) => {
