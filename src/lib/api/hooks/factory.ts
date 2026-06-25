@@ -62,10 +62,10 @@ export function createCrudHooks<T, ID extends string | number = string>(
     const qc = useQueryClient();
     return useMutation<T, unknown, { id: ID; data: Partial<T> }>({
       mutationFn: ({ id, data }) => service.update(id, data),
-      onSuccess: (data, vars, ctx) => {
+      onSuccess: (...args) => {
         qc.invalidateQueries({ queryKey: [key] });
-        qc.invalidateQueries({ queryKey: detailKey(vars.id) });
-        options?.onSuccess?.(data, vars, ctx);
+        qc.invalidateQueries({ queryKey: detailKey(args[1].id) });
+        (options?.onSuccess as any)?.(...args);
       },
       ...options,
     });
@@ -75,10 +75,10 @@ export function createCrudHooks<T, ID extends string | number = string>(
     const qc = useQueryClient();
     return useMutation<void, unknown, ID>({
       mutationFn: (id) => service.remove(id),
-      onSuccess: (_d, id, ctx) => {
+      onSuccess: (...args) => {
         qc.invalidateQueries({ queryKey: [key] });
-        qc.removeQueries({ queryKey: detailKey(id) });
-        options?.onSuccess?.(_d, id, ctx);
+        qc.removeQueries({ queryKey: detailKey(args[1]) });
+        (options?.onSuccess as any)?.(...args);
       },
       ...options,
     });
