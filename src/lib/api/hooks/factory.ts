@@ -50,7 +50,7 @@ export function createCrudHooks<T, ID extends string | number = string>(
       mutationFn: (payload) => service.create(payload),
       onSuccess: (...args) => {
         qc.invalidateQueries({ queryKey: [key] });
-        options?.onSuccess?.(...args);
+        (options?.onSuccess as any)?.(...args);
       },
       ...options,
     });
