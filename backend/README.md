@@ -1,7 +1,20 @@
 # DeptDesk ERP — Django Backend
 
-Django REST Framework backend for the **Students** module of DeptDesk ERP.
-Pairs with the existing frontend API client in `src/lib/api/`.
+Django 5 + DRF backend for the DeptDesk ERP frontend (Zeal Polytechnic).
+
+## Apps
+
+| App           | Resource(s)                          |
+|---------------|--------------------------------------|
+| `accounts`    | Custom `User`, JWT login, `/users/`  |
+| `departments` | `/departments/`                      |
+| `subjects`    | `/subjects/`                         |
+| `faculty`     | `/faculty/`                          |
+| `students`    | `/students/`                         |
+| `attendance`  | `/attendance/` + bulk/recent/trend   |
+| `results`     | `/results/`                          |
+| `timetable`   | `/timetable/` + by-class actions     |
+| `notices`     | `/notices/`                          |
 
 ## Quick start
 
@@ -9,36 +22,41 @@ Pairs with the existing frontend API client in `src/lib/api/`.
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+
+python manage.py makemigrations accounts departments subjects faculty students attendance results timetable notices
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver 0.0.0.0:8000
 ```
 
-The frontend expects `VITE_API_BASE_URL=http://localhost:8000/api`.
+Frontend env: `VITE_API_BASE_URL=http://localhost:8000/api`
 
-## Endpoints
+## Auth
 
-Auth (SimpleJWT):
+SimpleJWT — same endpoints the SPA's `authService` expects:
+
 - `POST /api/auth/token/` — `{ username, password }` → `{ access, refresh }`
+- `POST /api/auth/login/` — same + embedded `user` payload
 - `POST /api/auth/token/refresh/` — `{ refresh }` → `{ access }`
-- `POST /api/auth/token/verify/`
+- `GET  /api/auth/me/` — current user
+- `POST /api/auth/change-password/`
 
-Students (`students.StudentViewSet`):
+All `/api/*` endpoints require `Authorization: Bearer <access>`. The
+`accounts.User` model carries a `role` (`admin` | `faculty` | `student`)
+derived server-side; clients cannot self-elevate.
 
-| Method | Path                       | Purpose                              |
-|--------|----------------------------|--------------------------------------|
-| GET    | `/api/students/`           | Paginated list (filter/search/order) |
-| POST   | `/api/students/`           | Create one                           |
-| GET    | `/api/students/{id}/`      | Retrieve                             |
-| PATCH  | `/api/students/{id}/`      | Partial update                       |
-| PUT    | `/api/students/{id}/`      | Full update                          |
-| DELETE | `/api/students/{id}/`      | Destroy                              |
-| POST   | `/api/students/bulk/`      | Bulk create (CSV import)             |
-| GET    | `/api/students/stats/`     | Aggregate stats                      |
+## REST conventions
 
-Query params: `?dept=Computer&year=TY&search=rohan&ordering=-cgpa&page=2`
+- `GET    /api/<resource>/` — paginated list (`?page=2&search=...&ordering=...`)
+- `POST   /api/<resource>/` — create
+- `GET    /api/<resource>/<id>/` — retrieve
+- `PATCH  /api/<resource>/<id>/` — partial update
+- `PUT    /api/<resource>/<id>/` — full update
+- `DELETE /api/<resource>/<id>/` — destroy
 
-## Field mapping
+Custom actions:
 
-The model field `student_class` is exposed in the API as `class` to match
-the frontend `Student.class` property.
+- `POST /api/students/bulk/` · `GET /api/students/stats/`
+- `POST /api/attendance/bulk/` · `GET /api/attendance/recent/` · `GET /api/attendance/trend/`
+- `GET /api/timetable/by-class/<class_code>/`
+- `PUT /api/timetable/by-class/<class_code>/replace/`
