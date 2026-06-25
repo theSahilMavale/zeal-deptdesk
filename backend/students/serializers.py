@@ -1,7 +1,8 @@
 """DRF serializers for the Students app.
 
-Field names are aligned with the frontend Student type. The model field
-`student_class` is exposed as `class` because `class` is a Python keyword.
+Field names mirror the frontend `Student` TypeScript type. The Python
+keyword `class` cannot be a model field name, so the model uses
+`student_class` and the serializer exposes it as `class` via `source=`.
 """
 from rest_framework import serializers
 
@@ -9,10 +10,8 @@ from .models import Student
 
 
 class StudentSerializer(serializers.ModelSerializer):
-    # Frontend uses `class` — map it to the model's `student_class` field.
-    **{"class": serializers.CharField(source="student_class", max_length=32)} \
-        if False else None  # noqa: placeholder to keep linters quiet
-
+    # Map the model's `student_class` to the API field `class`.
+    # `class` is a reserved word, so we register it via `__init__`.
     class Meta:
         model = Student
         fields = [
@@ -32,15 +31,15 @@ class StudentSerializer(serializers.ModelSerializer):
             "attendance": {"required": False},
         }
 
-    # Declare the `class` alias explicitly (cleaner than the hack above).
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Replace any auto-generated `student_class` field, expose `class`.
-        if "student_class" in self.fields:
-            self.fields.pop("student_class")
-        self.fields["class"] = serializers.CharField(
+    def get_fields(self):
+        # Manually declare the `class` field — ModelSerializer can't
+        # auto-discover it from `fields` because the model attribute
+        # is named `student_class`.
+        fields = super().get_fields()
+        fields["class"] = serializers.CharField(
             source="student_class", max_length=32
         )
+        return fields
 
     def validate_id(self, value: str) -> str:
         value = value.strip()
