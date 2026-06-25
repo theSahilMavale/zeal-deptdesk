@@ -66,7 +66,7 @@ function sanitizeStoredUser(raw: string): AuthUser | null {
     // Re-derive the canonical record from the demo registry so that a tampered
     // localStorage role (e.g. user editing JSON to "admin") cannot grant access.
     const canonical = DEMO_ACCOUNTS.find(
-      (a) => a.id === parsed.id && a.email.toLowerCase() === parsed.email.toLowerCase(),
+      (a) => a.id === parsed.id && a.email.toLowerCase() === (parsed.email as string).toLowerCase(),
     );
     if (!canonical) return null;
     if (!VALID_ROLES.includes(canonical.role)) return null;
