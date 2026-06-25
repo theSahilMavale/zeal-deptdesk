@@ -4,10 +4,16 @@ import { PageHeader } from "@/components/page-shell";
 import { DataTable, Badge, type Column } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { FACULTY } from "@/lib/mock-data";
+import { RequireRole } from "@/lib/auth";
+import { AccessDenied } from "@/components/access-denied";
 
 export const Route = createFileRoute("/_authenticated/faculty")({
   head: () => ({ meta: [{ title: "Faculty — DeptDesk ERP" }] }),
-  component: FacultyPage,
+  component: () => (
+    <RequireRole roles={["admin"]} fallback={<AccessDenied />}>
+      <FacultyPage />
+    </RequireRole>
+  ),
 });
 
 function FacultyPage() {

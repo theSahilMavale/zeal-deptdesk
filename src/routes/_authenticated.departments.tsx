@@ -3,10 +3,16 @@ import { Building2, Users, GraduationCap, Plus } from "lucide-react";
 import { Card, PageHeader } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { DEPARTMENTS } from "@/lib/mock-data";
+import { RequireRole } from "@/lib/auth";
+import { AccessDenied } from "@/components/access-denied";
 
 export const Route = createFileRoute("/_authenticated/departments")({
   head: () => ({ meta: [{ title: "Departments — DeptDesk ERP" }] }),
-  component: DeptsPage,
+  component: () => (
+    <RequireRole roles={["admin"]} fallback={<AccessDenied />}>
+      <DeptsPage />
+    </RequireRole>
+  ),
 });
 
 function DeptsPage() {
