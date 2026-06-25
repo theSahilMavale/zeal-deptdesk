@@ -53,18 +53,84 @@ src/
 ├── components/          # App shell, sidebar, data table, page shell
 │   └── ui/              # shadcn/ui primitives
 ├── lib/
-│   ├── auth.tsx         # Mock auth + role derivation
+│   ├── api/             # Django REST integration (axios + React Query)
+│   │   ├── client.ts        # axios instance, JWT token storage + refresh
+│   │   ├── types.ts         # TypeScript shapes mirroring DRF serializers
+│   │   ├── services/        # Per-module REST clients (CRUD)
+│   │   └── hooks/           # React Query hooks (useList/useCreate/...)
+│   ├── auth.tsx         # Mock auth + role derivation (fallback)
 │   └── mock-data.ts     # Seed data for all modules
 └── styles.css           # Tailwind v4 theme tokens
 ```
 
+## Backend Integration (Django REST Framework)
+
+The frontend talks to a Django REST backend through `src/lib/api/`. Configure
+the base URL in `.env`:
+
+```
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+### Expected endpoints
+
+The services assume conventional DRF `ModelViewSet` URLs:
+
+| Module             | Endpoint                       |
+| ------------------ | ------------------------------ |
+| Auth (SimpleJWT)   | `POST /auth/login/`, `POST /auth/token/refresh/`, `POST /auth/logout/`, `GET /auth/me/` |
+| Departments        | `/departments/`                |
+| Classes            | `/classes/`                    |
+| Subjects           | `/subjects/`                   |
+| Students           | `/students/`                   |
+| Faculty            | `/faculty/`                    |
+| Users              | `/users/`                      |
+| Practical Manuals  | `/practical-manuals/`          |
+| Project Marks      | `/project-marks/`              |
+| Notices            | `/notices/`                    |
+| Results            | `/results/`                    |
+| Attendance         | `/attendance/`, `/attendance/recent/`, `/attendance/trend/`, `/attendance/bulk/` |
+| Timetable          | `/timetable/{class_id}/`       |
+| Analytics          | `/analytics/dept-enrollment/`, `/analytics/overview/` |
+
+Each resource supports `GET /` (list, with optional DRF pagination),
+`POST /`, `GET /:id/`, `PATCH /:id/`, `PUT /:id/`, `DELETE /:id/`.
+
+### Using the API in a component
+
+```tsx
+import { departmentsHooks } from "@/lib/api";
+
+function Departments() {
+  const { data: rows = [], isLoading } = departmentsHooks.useList();
+  const create = departmentsHooks.useCreate();
+  const update = departmentsHooks.useUpdate();
+  const remove = departmentsHooks.useRemove();
+  // ...render existing table, no UI changes required
+}
+```
+
+JWT access + refresh tokens are stored in `localStorage` under
+`deptdesk.access_token` / `deptdesk.refresh_token`. The axios interceptor
+attaches `Authorization: Bearer <token>` automatically and transparently
+refreshes on 401 via `/auth/token/refresh/`.
+
+### Authentication
+
+```ts
+import { authService } from "@/lib/api";
+await authService.login(email, password); // stores JWT + returns user
+await authService.logout();
+```
+
 ## Roadmap
 
-- Replace mock auth with Django REST + JWT
-- Wire data tables to live API endpoints
-- Add file uploads for practical manuals
+- Replace remaining mock-data fallbacks once Django endpoints are live
+- Add file uploads for practical manuals (multipart/form-data)
 - Email notifications for notices
+- Realtime updates via Django Channels / WebSockets
 
 ## License
 
 Internal project — Zeal Polytechnic.
+
