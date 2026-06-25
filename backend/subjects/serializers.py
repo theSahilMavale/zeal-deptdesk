@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from departments.models import Department
 from .models import Subject
 
 
@@ -7,7 +8,7 @@ class SubjectSerializer(serializers.ModelSerializer):
     # Frontend uses `dept` and `sem` keys.
     dept = serializers.SlugRelatedField(
         source="department", slug_field="code",
-        queryset=__import__("departments").models.Department.objects.all(),
+        queryset=Department.objects.all(),
     )
     sem = serializers.IntegerField(source="semester", min_value=1, max_value=8)
 
