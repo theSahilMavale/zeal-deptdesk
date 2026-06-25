@@ -26,24 +26,21 @@ import type {
   ResultRow,
   Student,
   Subject,
-  TimetableRow,
+  TimetableEntry,
   AppUser,
 } from "../types";
 
-export const departmentsHooks = createCrudHooks<Department>("departments", departmentsService);
-export const classesHooks = createCrudHooks<ClassSection>("classes", classesService);
-export const subjectsHooks = createCrudHooks<Subject>("subjects", subjectsService);
-export const studentsHooks = createCrudHooks<Student>("students", studentsService);
-export const facultyHooks = createCrudHooks<Faculty>("faculty", facultyService);
-export const usersHooks = createCrudHooks<AppUser>("users", usersService);
-export const practicalsHooks = createCrudHooks<PracticalManual>("practical-manuals", practicalsService);
-export const projectMarksHooks = createCrudHooks<ProjectMark>("project-marks", projectMarksService);
-export const noticesHooks = createCrudHooks<Notice>("notices", noticesService);
-export const resultsHooks = createCrudHooks<ResultRow>("results", resultsService);
-export const attendanceHooks = createCrudHooks<AttendanceRecord, string | number>(
-  "attendance",
-  attendanceService,
-);
+export const departmentsHooks = createCrudHooks<Department, string>("departments", departmentsService);
+export const classesHooks = createCrudHooks<ClassSection, string>("classes", classesService);
+export const subjectsHooks = createCrudHooks<Subject, string>("subjects", subjectsService);
+export const studentsHooks = createCrudHooks<Student, string>("students", studentsService);
+export const facultyHooks = createCrudHooks<Faculty, string>("faculty", facultyService);
+export const usersHooks = createCrudHooks<AppUser, number>("users", usersService);
+export const practicalsHooks = createCrudHooks<PracticalManual, string>("practical-manuals", practicalsService);
+export const projectMarksHooks = createCrudHooks<ProjectMark, string>("project-marks", projectMarksService);
+export const noticesHooks = createCrudHooks<Notice, number>("notices", noticesService);
+export const resultsHooks = createCrudHooks<ResultRow, number>("results", resultsService);
+export const attendanceHooks = createCrudHooks<AttendanceRecord, number>("attendance", attendanceService);
 
 /* ----------------------------- Analytics ----------------------------- */
 
@@ -61,13 +58,6 @@ export function useAttendanceTrend(params?: { weeks?: number; dept?: string }) {
   });
 }
 
-export function useDeptEnrollment() {
-  return useQuery({
-    queryKey: ["analytics", "dept-enrollment"],
-    queryFn: () => analyticsService.deptEnrollment(),
-  });
-}
-
 export function useOverview() {
   return useQuery({
     queryKey: ["analytics", "overview"],
@@ -77,20 +67,21 @@ export function useOverview() {
 
 /* ----------------------------- Timetable ----------------------------- */
 
-export function useTimetable(classId: string | undefined) {
+export function useTimetable(classCode: string | undefined) {
   return useQuery({
-    queryKey: ["timetable", classId],
-    queryFn: () => timetableService.forClass(classId as string),
-    enabled: !!classId,
+    queryKey: ["timetable", "by-class", classCode],
+    queryFn: () => timetableService.forClass(classCode as string),
+    enabled: !!classCode,
   });
 }
 
-export function useUpdateTimetable() {
+export function useReplaceTimetable() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ classId, rows }: { classId: string; rows: TimetableRow[] }) =>
-      timetableService.update(classId, rows),
-    onSuccess: (_d, vars) => qc.invalidateQueries({ queryKey: ["timetable", vars.classId] }),
+    mutationFn: ({ classCode, rows }: { classCode: string; rows: Partial<TimetableEntry>[] }) =>
+      timetableService.replaceClass(classCode, rows),
+    onSuccess: (_d, vars) =>
+      qc.invalidateQueries({ queryKey: ["timetable", "by-class", vars.classCode] }),
   });
 }
 
@@ -99,7 +90,7 @@ export function useUpdateTimetable() {
 export function useMarkAttendanceBulk() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (records: AttendanceRecord[]) => attendanceService.markBulk(records),
+    mutationFn: (records: Partial<AttendanceRecord>[]) => attendanceService.markBulk(records),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["attendance"] }),
   });
 }
