@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { School, GraduationCap, Users as UsersIcon, Shield, Lock, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth, type Role } from "@/lib/auth";
+import { useAuth } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,9 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const ROLES: { id: Role; label: string; icon: typeof Shield; sample: string }[] = [
+type RoleHint = "admin" | "faculty" | "student";
+
+const ROLES: { id: RoleHint; label: string; icon: typeof Shield; sample: string }[] = [
   { id: "admin", label: "Admin", icon: Shield, sample: "admin@zealpoly.edu" },
   { id: "faculty", label: "Faculty", icon: UsersIcon, sample: "sneha@zealpoly.edu" },
   { id: "student", label: "Student", icon: GraduationCap, sample: "rohan@zealpoly.edu" },
@@ -26,9 +28,9 @@ const ROLES: { id: Role; label: string; icon: typeof Shield; sample: string }[] 
 function AuthPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
-  const [role, setRole] = useState<Role>("admin");
+  const [roleHint, setRoleHint] = useState<RoleHint>("admin");
   const [email, setEmail] = useState("admin@zealpoly.edu");
-  const [password, setPassword] = useState("demo1234");
+  const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -39,9 +41,11 @@ function AuthPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await login(email, password, role);
-      toast.success("Welcome to DeptDesk ERP");
+      const u = await login(email, password);
+      toast.success(`Welcome, ${u.name}`);
       navigate({ to: "/dashboard", replace: true });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Sign-in failed");
     } finally {
       setSubmitting(false);
     }
@@ -116,15 +120,16 @@ function AuthPage() {
           {/* Role selector */}
           <div className="mt-6 grid grid-cols-3 gap-2">
             {ROLES.map((r) => {
-              const active = role === r.id;
+              const active = roleHint === r.id;
               const Icon = r.icon;
               return (
                 <button
                   key={r.id}
                   type="button"
                   onClick={() => {
-                    setRole(r.id);
+                    setRoleHint(r.id);
                     setEmail(r.sample);
+                    setPassword("");
                   }}
                   className={
                     "flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs font-medium transition-all " +
@@ -149,6 +154,7 @@ function AuthPage() {
                   id="email"
                   type="email"
                   required
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-11 pl-9"
@@ -158,9 +164,6 @@ function AuthPage() {
             <div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <button type="button" className="text-xs font-medium text-primary hover:underline">
-                  Forgot?
-                </button>
               </div>
               <div className="relative mt-1.5">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -168,6 +171,7 @@ function AuthPage() {
                   id="password"
                   type="password"
                   required
+                  autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-11 pl-9"
@@ -180,12 +184,15 @@ function AuthPage() {
               disabled={submitting}
               className="h-11 w-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110"
             >
-              {submitting ? "Signing in…" : `Sign in as ${role[0].toUpperCase() + role.slice(1)}`}
+              {submitting ? "Signing in…" : "Sign in"}
             </Button>
 
-            <p className="text-center text-xs text-muted-foreground">
-              Demo mode — any password works.
-            </p>
+            <div className="rounded-lg border border-border bg-muted/30 p-3 text-[11px] leading-relaxed text-muted-foreground">
+              <div className="mb-1 font-semibold text-foreground">Demo credentials</div>
+              <div>admin@zealpoly.edu / admin@123</div>
+              <div>sneha@zealpoly.edu / faculty@123</div>
+              <div>rohan@zealpoly.edu / student@123</div>
+            </div>
           </form>
         </div>
       </div>
