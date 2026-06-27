@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/page-shell";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CrudDialog, ConfirmDelete, type FieldDef } from "@/components/crud-dialog";
 import { RequireRole } from "@/lib/auth";
 import { AccessDenied } from "@/components/access-denied";
-import { usersHooks } from "@/lib/api";
+import { departmentsHooks, usersHooks } from "@/lib/api";
 import type { AppUser } from "@/lib/api/types";
 
 export const Route = createFileRoute("/_authenticated/users")({
