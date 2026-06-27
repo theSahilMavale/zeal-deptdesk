@@ -226,6 +226,8 @@ function UsersPage() {
         onConfirm={async () => {
           if (!deleting) return;
           await remove.mutateAsync(deleting.id);
+          queryClient.invalidateQueries({ queryKey: ["faculty"] });
+          queryClient.invalidateQueries({ queryKey: ["students"] });
           toast.success("User deleted");
           setDeleting(null);
         }}
