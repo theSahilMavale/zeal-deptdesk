@@ -4,6 +4,7 @@ Student domain model.
 Mirrors the `Student` TypeScript interface in `src/lib/api/types.ts`:
     id, name, email, phone, class, dept, year, cgpa, attendance
 """
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
@@ -18,6 +19,12 @@ class Student(models.Model):
     # `id` is the roll number (e.g. "ZP-CO-001") — used as the primary key
     # so the frontend can keep using the human-readable identifier.
     id = models.CharField(primary_key=True, max_length=32)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name="student_profile",
+    )
     name = models.CharField(max_length=120)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=20, blank=True)
