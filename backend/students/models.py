@@ -4,6 +4,7 @@ Student domain model.
 Mirrors the `Student` TypeScript interface in `src/lib/api/types.ts`:
     id, name, email, phone, class, dept, year, cgpa, attendance
 """
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
