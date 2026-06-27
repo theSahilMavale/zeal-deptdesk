@@ -134,10 +134,12 @@ export function CrudDialog({
   const set = (name: string, value: any) =>
     setValues((s) => ({ ...s, [name]: value }));
 
+  const visibleFields = fields.filter((f) => !f.showWhen || f.showWhen(values));
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs: Record<string, string> = {};
-    for (const f of fields) {
+    for (const f of visibleFields) {
       const v = values[f.name];
       if ("required" in f && f.required) {
         const empty =
@@ -163,12 +165,12 @@ export function CrudDialog({
       setErrors(errs);
       return;
     }
-    // Normalize numeric values
-    const payload: CrudValues = { ...values };
-    fields.forEach((f) => {
-      if (f.type === "number" && payload[f.name] !== "" && payload[f.name] != null) {
-        payload[f.name] = Number(payload[f.name]);
-      }
+    // Build payload with only visible fields; normalize numbers.
+    const payload: CrudValues = {};
+    visibleFields.forEach((f) => {
+      let val = values[f.name];
+      if (f.type === "number" && val !== "" && val != null) val = Number(val);
+      payload[f.name] = val;
     });
     try {
       await onSubmit(payload);
@@ -197,7 +199,7 @@ export function CrudDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="grid gap-4 py-2">
-          {fields.map((f) => (
+          {visibleFields.map((f) => (
             <FieldRow
               key={f.name}
               field={f}
