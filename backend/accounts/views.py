@@ -38,6 +38,14 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ["username", "email", "first_name", "last_name"]
     ordering_fields = ["username", "email", "role"]
 
+    def perform_destroy(self, instance):
+        # Remove the linked Faculty/Student profile so the user disappears
+        # from those modules too. Student.user uses CASCADE so it goes
+        # automatically; Faculty.user is SET_NULL, so clean it up here.
+        Faculty.objects.filter(user=instance).delete()
+        Student.objects.filter(user=instance).delete()
+        instance.delete()
+
 
 class LoginView(TokenObtainPairView):
     """
