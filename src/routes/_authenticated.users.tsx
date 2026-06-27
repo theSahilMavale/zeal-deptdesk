@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CrudDialog, ConfirmDelete, type FieldDef } from "@/components/crud-dialog";
 import { RequireRole } from "@/lib/auth";
 import { AccessDenied } from "@/components/access-denied";
-import { departmentsHooks, usersHooks } from "@/lib/api";
+import { departmentsHooks, usersHooks, classesHooks } from "@/lib/api";
 import type { AppUser } from "@/lib/api/types";
 
 export const Route = createFileRoute("/_authenticated/users")({
@@ -25,6 +25,7 @@ function UsersPage() {
   const queryClient = useQueryClient();
   const { data: users = [], isLoading } = usersHooks.useList();
   const { data: departments = [] } = departmentsHooks.useList();
+  const { data: classes = [] } = classesHooks.useList();
   const create = usersHooks.useCreate();
   const update = usersHooks.useUpdate();
   const remove = usersHooks.useRemove();
@@ -36,6 +37,10 @@ function UsersPage() {
   const deptOptions = useMemo(
     () => departments.map((d: any) => ({ label: `${d.code} — ${d.name}`, value: d.code })),
     [departments],
+  );
+  const classOptions = useMemo(
+    () => (classes as any[]).map((c) => ({ label: `${c.id} — ${c.dept}`, value: c.id })),
+    [classes],
   );
 
   const fields: FieldDef[] = useMemo(() => [
@@ -88,8 +93,8 @@ function UsersPage() {
       showWhen: (v) => !editing && v.role === "student",
     },
     {
-      name: "student_class", label: "Class", type: "text", required: true,
-      placeholder: "e.g. CO5I",
+      name: "student_class", label: "Class", type: "select", required: true,
+      options: classOptions,
       showWhen: (v) => !editing && v.role === "student",
     },
     {

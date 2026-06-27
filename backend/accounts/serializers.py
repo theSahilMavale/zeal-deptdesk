@@ -6,6 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from departments.models import Department
 from faculty.models import Faculty
 from students.models import Student
+from classes.models import ClassSection
 
 User = get_user_model()
 
@@ -140,16 +141,28 @@ class UserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {"profile_id": "A student with this roll number already exists."}
                 )
+            # Ensure the class exists so the student is visible in the
+            # Attendance / Results / Practicals rosters (which filter by
+            # `student_class` = ClassSection.id).
+            cls = ClassSection.objects.filter(id=profile["student_class"]).first()
+            if not cls:
+                raise serializers.ValidationError(
+                    {"student_class": f"Class '{profile['student_class']}' does not exist. Create it first under Classes."}
+                )
+            # Normalize dept & year from the chosen class for consistency.
+            dept_code = cls.department_id or profile["dept"]
+            year = cls.year or profile["year"]
             Student.objects.create(
                 id=profile["profile_id"],
                 user=user,
                 name=self._full_name(validated_data),
                 email=email,
                 phone=validated_data.get("phone", ""),
-                student_class=profile["student_class"],
-                dept=profile["dept"],
-                year=profile["year"],
+                student_class=cls.id,
+                dept=dept_code,
+                year=year,
             )
+
         return user
 
     @transaction.atomic
