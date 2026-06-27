@@ -22,7 +22,9 @@ export const Route = createFileRoute("/_authenticated/users")({
 });
 
 function UsersPage() {
+  const queryClient = useQueryClient();
   const { data: users = [], isLoading } = usersHooks.useList();
+  const { data: departments = [] } = departmentsHooks.useList();
   const create = usersHooks.useCreate();
   const update = usersHooks.useUpdate();
   const remove = usersHooks.useRemove();
@@ -30,6 +32,11 @@ function UsersPage() {
   const [openForm, setOpenForm] = useState(false);
   const [editing, setEditing] = useState<AppUser | null>(null);
   const [deleting, setDeleting] = useState<AppUser | null>(null);
+
+  const deptOptions = useMemo(
+    () => departments.map((d: any) => ({ label: `${d.code} — ${d.name}`, value: d.code })),
+    [departments],
+  );
 
   const fields: FieldDef[] = useMemo(() => [
     { name: "username", label: "Username", type: "text", required: true, disabled: !!editing },
@@ -39,6 +46,7 @@ function UsersPage() {
     { name: "phone", label: "Phone", type: "tel" },
     {
       name: "role", label: "Role", type: "select", required: true,
+      disabled: !!editing,
       options: [
         { label: "Admin", value: "admin" },
         { label: "Faculty", value: "faculty" },
@@ -47,10 +55,57 @@ function UsersPage() {
     },
     { name: "password", label: editing ? "New password (leave blank to keep)" : "Password", type: "text", required: !editing },
     { name: "is_active", label: "Active", type: "switch" },
-  ], [editing]);
+
+    // Faculty-only fields (create flow)
+    {
+      name: "profile_id", label: "Employee Code", type: "text", required: true,
+      placeholder: "e.g. FAC-CO-001",
+      showWhen: (v) => !editing && v.role === "faculty",
+    },
+    {
+      name: "dept", label: "Department", type: "select", required: true,
+      options: deptOptions,
+      showWhen: (v) => !editing && (v.role === "faculty" || v.role === "student"),
+    },
+    {
+      name: "designation", label: "Designation", type: "select", required: true,
+      options: [
+        { label: "Professor", value: "Professor" },
+        { label: "Associate Professor", value: "Associate Professor" },
+        { label: "Assistant Professor", value: "Assistant Professor" },
+        { label: "Lecturer", value: "Lecturer" },
+      ],
+      showWhen: (v) => !editing && v.role === "faculty",
+    },
+    {
+      name: "experience", label: "Experience (years)", type: "number", min: 0,
+      showWhen: (v) => !editing && v.role === "faculty",
+    },
+
+    // Student-only fields (create flow)
+    {
+      name: "profile_id", label: "Roll Number", type: "text", required: true,
+      placeholder: "e.g. ZP-CO-001",
+      showWhen: (v) => !editing && v.role === "student",
+    },
+    {
+      name: "student_class", label: "Class", type: "text", required: true,
+      placeholder: "e.g. CO5I",
+      showWhen: (v) => !editing && v.role === "student",
+    },
+    {
+      name: "year", label: "Year", type: "select", required: true,
+      options: [
+        { label: "First Year", value: "FY" },
+        { label: "Second Year", value: "SY" },
+        { label: "Third Year", value: "TY" },
+      ],
+      showWhen: (v) => !editing && v.role === "student",
+    },
+  ], [editing, deptOptions]);
 
   const handleSubmit = async (values: Record<string, any>) => {
-    const payload: Partial<AppUser> = {
+    const payload: Record<string, any> = {
       username: values.username,
       email: values.email,
       first_name: values.first_name || "",
@@ -61,6 +116,20 @@ function UsersPage() {
     };
     if (values.password) payload.password = values.password;
 
+    if (!editing) {
+      if (values.role === "faculty") {
+        payload.profile_id = values.profile_id;
+        payload.dept = values.dept;
+        payload.designation = values.designation;
+        payload.experience = Number(values.experience || 0);
+      } else if (values.role === "student") {
+        payload.profile_id = values.profile_id;
+        payload.dept = values.dept;
+        payload.student_class = values.student_class;
+        payload.year = values.year;
+      }
+    }
+
     if (editing) {
       await update.mutateAsync({ id: editing.id, data: payload });
       toast.success("User updated");
@@ -68,6 +137,9 @@ function UsersPage() {
       await create.mutateAsync(payload);
       toast.success("User created");
     }
+    // Linked profile may have been created/updated/deleted.
+    queryClient.invalidateQueries({ queryKey: ["faculty"] });
+    queryClient.invalidateQueries({ queryKey: ["students"] });
     setOpenForm(false);
     setEditing(null);
   };
