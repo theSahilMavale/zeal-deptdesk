@@ -93,8 +93,8 @@ function UsersPage() {
       showWhen: (v) => !editing && v.role === "student",
     },
     {
-      name: "student_class", label: "Class", type: "text", required: true,
-      placeholder: "e.g. CO5I",
+      name: "student_class", label: "Class", type: "select", required: true,
+      options: classOptions,
       showWhen: (v) => !editing && v.role === "student",
     },
     {
