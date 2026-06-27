@@ -46,7 +46,6 @@ function UsersPage() {
     { name: "phone", label: "Phone", type: "tel" },
     {
       name: "role", label: "Role", type: "select", required: true,
-      disabled: !!editing,
       options: [
         { label: "Admin", value: "admin" },
         { label: "Faculty", value: "faculty" },
