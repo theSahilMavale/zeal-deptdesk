@@ -31,59 +31,63 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
-export type FieldDef =
-  | {
-      name: string;
-      label: string;
-      type: "text" | "email" | "tel" | "number" | "date" | "time";
-      required?: boolean;
-      placeholder?: string;
-      min?: number;
-      max?: number;
-      step?: number;
-      disabled?: boolean;
-      className?: string;
-    }
-  | {
-      name: string;
-      label: string;
-      type: "textarea";
-      required?: boolean;
-      placeholder?: string;
-      rows?: number;
-      className?: string;
-    }
-  | {
-      name: string;
-      label: string;
-      type: "switch";
-      className?: string;
-    }
-  | {
-      name: string;
-      label: string;
-      type: "select";
-      options: { label: string; value: string | number }[];
-      required?: boolean;
-      placeholder?: string;
-      className?: string;
-      allowEmpty?: boolean;
-    }
-  | {
-      name: string;
-      label: string;
-      type: "multiselect";
-      options: { label: string; value: string }[];
-      className?: string;
-    }
-  | {
-      name: string;
-      label: string;
-      type: "file";
-      accept?: string;
-      required?: boolean;
-      className?: string;
-    };
+type FieldBase = { showWhen?: (values: Record<string, any>) => boolean };
+
+export type FieldDef = FieldBase &
+  (
+    | {
+        name: string;
+        label: string;
+        type: "text" | "email" | "tel" | "number" | "date" | "time";
+        required?: boolean;
+        placeholder?: string;
+        min?: number;
+        max?: number;
+        step?: number;
+        disabled?: boolean;
+        className?: string;
+      }
+    | {
+        name: string;
+        label: string;
+        type: "textarea";
+        required?: boolean;
+        placeholder?: string;
+        rows?: number;
+        className?: string;
+      }
+    | {
+        name: string;
+        label: string;
+        type: "switch";
+        className?: string;
+      }
+    | {
+        name: string;
+        label: string;
+        type: "select";
+        options: { label: string; value: string | number }[];
+        required?: boolean;
+        placeholder?: string;
+        className?: string;
+        allowEmpty?: boolean;
+      }
+    | {
+        name: string;
+        label: string;
+        type: "multiselect";
+        options: { label: string; value: string }[];
+        className?: string;
+      }
+    | {
+        name: string;
+        label: string;
+        type: "file";
+        accept?: string;
+        required?: boolean;
+        className?: string;
+      }
+  );
 
 export type CrudValues = Record<string, any>;
 
