@@ -8,10 +8,16 @@ import { Button } from "@/components/ui/button";
 import { CrudDialog, ConfirmDelete, type FieldDef } from "@/components/crud-dialog";
 import { subjectsHooks, departmentsHooks } from "@/lib/api";
 import type { Subject, Department } from "@/lib/api/types";
+import { RequireRole } from "@/lib/auth";
+import { AccessDenied } from "@/components/access-denied";
 
 export const Route = createFileRoute("/_authenticated/subjects")({
   head: () => ({ meta: [{ title: "Subjects — DeptDesk ERP" }] }),
-  component: SubjectsPage,
+  component: () => (
+    <RequireRole roles={["admin"]} fallback={<AccessDenied />}>
+      <SubjectsPage />
+    </RequireRole>
+  ),
 });
 
 function SubjectsPage() {
