@@ -8,10 +8,16 @@ import { Button } from "@/components/ui/button";
 import { CrudDialog, ConfirmDelete, type FieldDef } from "@/components/crud-dialog";
 import { projectMarksHooks, facultyHooks } from "@/lib/api";
 import type { ProjectMark, Faculty } from "@/lib/api/types";
+import { RequireRole } from "@/lib/auth";
+import { AccessDenied } from "@/components/access-denied";
 
 export const Route = createFileRoute("/_authenticated/project-marks")({
   head: () => ({ meta: [{ title: "Project Marks — DeptDesk ERP" }] }),
-  component: ProjectMarksPage,
+  component: () => (
+    <RequireRole roles={["admin", "faculty"]} fallback={<AccessDenied />}>
+      <ProjectMarksPage />
+    </RequireRole>
+  ),
 });
 
 function statusTone(s: string) {

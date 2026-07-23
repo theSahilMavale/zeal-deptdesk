@@ -8,10 +8,16 @@ import { Button } from "@/components/ui/button";
 import { CrudDialog, ConfirmDelete, type FieldDef } from "@/components/crud-dialog";
 import { studentsHooks, departmentsHooks, classesHooks } from "@/lib/api";
 import type { Student, Department, ClassSection } from "@/lib/api/types";
+import { RequireRole } from "@/lib/auth";
+import { AccessDenied } from "@/components/access-denied";
 
 export const Route = createFileRoute("/_authenticated/students")({
   head: () => ({ meta: [{ title: "Students — DeptDesk ERP" }] }),
-  component: StudentsPage,
+  component: () => (
+    <RequireRole roles={["admin"]} fallback={<AccessDenied />}>
+      <StudentsPage />
+    </RequireRole>
+  ),
 });
 
 function StudentsPage() {

@@ -17,10 +17,16 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
 import type { Student, Subject, ClassSection } from "@/lib/api/types";
+import { RequireRole } from "@/lib/auth";
+import { AccessDenied } from "@/components/access-denied";
 
 export const Route = createFileRoute("/_authenticated/attendance")({
   head: () => ({ meta: [{ title: "Attendance — DeptDesk ERP" }] }),
-  component: AttendancePage,
+  component: () => (
+    <RequireRole roles={["admin", "faculty"]} fallback={<AccessDenied />}>
+      <AttendancePage />
+    </RequireRole>
+  ),
 });
 
 type Status = "Present" | "Absent";
