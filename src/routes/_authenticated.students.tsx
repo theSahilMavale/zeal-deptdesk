@@ -56,7 +56,8 @@ function StudentsPage() {
           ] as FieldDef[])
         : ([
             { name: "username", label: "Login Username (optional)", type: "text", placeholder: "Defaults to roll number" },
-            { name: "password", label: "Login Password", type: "password", required: true, placeholder: "Min 8 characters" },
+            { name: "password", label: "Password", type: "password", required: true, placeholder: "Min 8 chars, letters & numbers" },
+            { name: "password_confirm", label: "Confirm Password", type: "password", required: true, placeholder: "Re-enter password" },
           ] as FieldDef[])),
     ],
     [depts, classes, editing],
@@ -64,21 +65,45 @@ function StudentsPage() {
 
 
   const handleSubmit = async (values: Record<string, any>) => {
+    if (!editing) {
+      const pwd = String(values.password ?? "");
+      const confirm = String(values.password_confirm ?? "");
+      if (pwd.length < 8) {
+        toast.error("Password must be at least 8 characters.");
+        throw new Error("weak-password");
+      }
+      if (!/[A-Za-z]/.test(pwd) || !/\d/.test(pwd)) {
+        toast.error("Password must contain both letters and numbers.");
+        throw new Error("weak-password");
+      }
+      if (pwd !== confirm) {
+        toast.error("Passwords do not match.");
+        throw new Error("password-mismatch");
+      }
+      const email = String(values.email ?? "").trim().toLowerCase();
+      if ((students as Student[]).some((s) => s.email?.toLowerCase() === email)) {
+        toast.error("A student with this email already exists.");
+        throw new Error("duplicate-email");
+      }
+    }
+
+    const { password_confirm: _pc, ...rest } = values;
     const payload = {
-      ...values,
-      cgpa: values.cgpa === "" ? 0 : Number(values.cgpa),
-      attendance: values.attendance === "" ? 0 : Number(values.attendance),
+      ...rest,
+      cgpa: rest.cgpa === "" ? 0 : Number(rest.cgpa),
+      attendance: rest.attendance === "" ? 0 : Number(rest.attendance),
     };
     if (editing) {
       await update.mutateAsync({ id: editing.id, data: payload });
       toast.success("Student updated");
     } else {
       await create.mutateAsync(payload);
-      toast.success("Student added");
+      toast.success("Student added — login is ready");
     }
     setOpenForm(false);
     setEditing(null);
   };
+
 
   const cols: Column<Student>[] = [
     { key: "id", header: "Roll No", className: "font-mono text-xs" },
