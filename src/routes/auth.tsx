@@ -187,12 +187,6 @@ function AuthPage() {
               {submitting ? "Signing in…" : "Sign in"}
             </Button>
 
-            <div className="rounded-lg border border-border bg-muted/30 p-3 text-[11px] leading-relaxed text-muted-foreground">
-              <div className="mb-1 font-semibold text-foreground">Demo credentials</div>
-              <div>admin@zealpoly.edu / admin@123</div>
-              <div>sneha@zealpoly.edu / faculty@123</div>
-              <div>rohan@zealpoly.edu / student@123</div>
-            </div>
           </form>
         </div>
       </div>
