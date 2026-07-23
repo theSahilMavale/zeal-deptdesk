@@ -38,7 +38,7 @@ export type FieldDef = FieldBase &
     | {
         name: string;
         label: string;
-        type: "text" | "email" | "tel" | "number" | "date" | "time";
+        type: "text" | "email" | "tel" | "number" | "date" | "time" | "password";
         required?: boolean;
         placeholder?: string;
         min?: number;
