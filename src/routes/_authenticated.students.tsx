@@ -50,9 +50,18 @@ function StudentsPage() {
       },
       { name: "cgpa", label: "CGPA (0-10)", type: "number", min: 0, max: 10, step: 0.01 },
       { name: "attendance", label: "Attendance %", type: "number", min: 0, max: 100 },
+      ...(editing
+        ? ([
+            { name: "password", label: "Reset Password (optional)", type: "password", placeholder: "Leave blank to keep current" },
+          ] as FieldDef[])
+        : ([
+            { name: "username", label: "Login Username (optional)", type: "text", placeholder: "Defaults to roll number" },
+            { name: "password", label: "Login Password", type: "password", required: true, placeholder: "Min 8 characters" },
+          ] as FieldDef[])),
     ],
     [depts, classes, editing],
   );
+
 
   const handleSubmit = async (values: Record<string, any>) => {
     const payload = {

@@ -1,4 +1,5 @@
 """ViewSets for the Students app."""
+from django.db import transaction
 from django.db.models import Avg
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 
 from .models import Student
 from .serializers import StudentSerializer
+
 
 
 class StudentViewSet(viewsets.ModelViewSet):
@@ -34,6 +36,16 @@ class StudentViewSet(viewsets.ModelViewSet):
     ordering_fields = ["id", "name", "cgpa", "attendance"]
     ordering = ["id"]
 
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        # Cascade-delete the linked login account so the student can no
+        # longer sign in. Only delete users whose sole role is "student"
+        # (never wipe an admin/faculty account that happens to be linked).
+        user = instance.user
+        instance.delete()
+        if user is not None and getattr(user, "role", "") == "student" and not user.is_superuser:
+            user.delete()
+
     @action(detail=False, methods=["post"], url_path="bulk")
     def bulk_create(self, request):
         """Create many students in one request (used by the 'Import CSV' UI)."""
@@ -44,6 +56,7 @@ class StudentViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
     @action(detail=False, methods=["get"], url_path="stats")
     def stats(self, request):
