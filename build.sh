@@ -7,3 +7,4 @@ python -m pip install -r requirements.txt
 
 python backend/manage.py collectstatic --no-input
 python backend/manage.py migrate --no-input
+python backend/manage.py ensure_superuser
