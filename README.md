@@ -69,7 +69,7 @@ The frontend talks to a Django REST backend through `src/lib/api/`. Configure
 the base URL in `.env`:
 
 ```
-VITE_API_BASE_URL=http://localhost:8000/api
+VITE_API_BASE_URL=https://zeal-deptdesk.onrender.com/api
 ```
 
 ### Expected endpoints
