@@ -1,0 +1,3 @@
+# DeptDesk ERP - Python dependencies
+# The Django backend lives in the backend/ directory.
+-r backend/requirements.txt
