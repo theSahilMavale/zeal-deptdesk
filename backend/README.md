@@ -35,13 +35,13 @@ python manage.py createsuperuser   # use email + a password
 python manage.py runserver 0.0.0.0:8000
 ```
 
-Frontend env: `VITE_API_BASE_URL=http://localhost:8000/api`
+Frontend env: `VITE_API_BASE_URL=https://zeal-deptdesk.onrender.com/api`
 
 Uploaded practical-manual files are stored under `backend/media/` and
 served at `/media/...` while `DEBUG=1`.
 
 
-Frontend env: `VITE_API_BASE_URL=http://localhost:8000/api`
+Frontend env: `VITE_API_BASE_URL=https://zeal-deptdesk.onrender.com/api`
 
 ## Auth
 

@@ -4,11 +4,11 @@ import axios, { AxiosError, type AxiosInstance, type AxiosRequestConfig } from "
  * Axios instance for the Django REST Framework backend.
  *
  * Configure the base URL via the `VITE_API_BASE_URL` environment variable.
- * Defaults to `http://localhost:8000/api` (typical Django dev server).
+ * Defaults to the deployed Django backend on Render.
  */
 export const API_BASE_URL: string =
   (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_API_BASE_URL) ||
-  "http://localhost:8000/api";
+  "https://zeal-deptdesk.onrender.com/api";
 
 const ACCESS_TOKEN_KEY = "deptdesk.access_token";
 const REFRESH_TOKEN_KEY = "deptdesk.refresh_token";
