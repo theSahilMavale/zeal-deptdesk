@@ -1,0 +1,1 @@
+web: gunicorn deptdesk.wsgi:application
