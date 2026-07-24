@@ -56,31 +56,67 @@ function FacultyPage() {
         options: (subjects as Subject[]).map((s) => ({ label: `${s.code} ${s.name}`, value: s.code })),
       },
       { name: "experience", label: "Experience (years)", type: "number", min: 0, max: 60 },
+      ...(editing
+        ? ([
+            { name: "password", label: "Reset Password (optional)", type: "password", placeholder: "Leave blank to keep current" },
+          ] as FieldDef[])
+        : ([
+            { name: "username", label: "Login Username (optional)", type: "text", placeholder: "Defaults to employee ID" },
+            { name: "password", label: "Password", type: "password", required: true, placeholder: "Min 8 chars, letters & numbers" },
+            { name: "password_confirm", label: "Confirm Password", type: "password", required: true, placeholder: "Re-enter password" },
+          ] as FieldDef[])),
     ],
     [depts, subjects, editing],
   );
 
   const handleSubmit = async (values: Record<string, any>) => {
-    const payload: Partial<Faculty> = {
-      id: values.id,
-      name: values.name,
-      email: values.email,
-      phone: values.phone || "",
-      dept: values.dept,
-      designation: values.designation,
-      subjects: values.subjects ?? [],
-      experience: Number(values.experience || 0),
+    if (!editing) {
+      const pwd = String(values.password ?? "");
+      const confirm = String(values.password_confirm ?? "");
+      if (pwd.length < 8) {
+        toast.error("Password must be at least 8 characters.");
+        throw new Error("weak-password");
+      }
+      if (!/[A-Za-z]/.test(pwd) || !/\d/.test(pwd)) {
+        toast.error("Password must contain both letters and numbers.");
+        throw new Error("weak-password");
+      }
+      if (pwd !== confirm) {
+        toast.error("Passwords do not match.");
+        throw new Error("password-mismatch");
+      }
+      const email = String(values.email ?? "").trim().toLowerCase();
+      if ((faculty as Faculty[]).some((f) => f.email?.toLowerCase() === email)) {
+        toast.error("A faculty member with this email already exists.");
+        throw new Error("duplicate-email");
+      }
+    }
+
+    const { password_confirm: _pc, ...rest } = values;
+    const payload: Partial<Faculty> & { username?: string; password?: string } = {
+      id: rest.id,
+      name: rest.name,
+      email: rest.email,
+      phone: rest.phone || "",
+      dept: rest.dept,
+      designation: rest.designation,
+      subjects: rest.subjects ?? [],
+      experience: Number(rest.experience || 0),
     };
+    if (rest.username) payload.username = rest.username;
+    if (rest.password) payload.password = rest.password;
+
     if (editing) {
       await update.mutateAsync({ id: editing.id, data: payload });
       toast.success("Faculty updated");
     } else {
       await create.mutateAsync(payload);
-      toast.success("Faculty added");
+      toast.success("Faculty added — login is ready");
     }
     setOpenForm(false);
     setEditing(null);
   };
+
 
   const cols: Column<Faculty>[] = [
     { key: "id", header: "ID", className: "font-mono text-xs" },
