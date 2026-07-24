@@ -21,8 +21,8 @@ class Command(BaseCommand):
         User = get_user_model()
 
         username = os.environ.get("DJANGO_SUPERUSER_USERNAME", "admin")
-        email = os.environ.get("DJANGO_SUPERUSER_EMAIL", "admin@deptdesk.local")
-        password = os.environ.get("DJANGO_SUPERUSER_PASSWORD")
+        email = os.environ.get("DJANGO_SUPERUSER_EMAIL", "admin@zealpoly.edu")
+        password = os.environ.get("DJANGO_SUPERUSER_PASSWORD", "admin@123")
 
         if not password:
             self.stdout.write(self.style.WARNING(
