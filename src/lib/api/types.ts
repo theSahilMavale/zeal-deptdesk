@@ -60,7 +60,11 @@ export interface Faculty {
   subjects: string[];
   experience: number;
   user?: number | null;
+  username?: string;
+  password?: string;
+  has_login?: boolean;
 }
+
 
 export interface AppUser {
   id: number;
