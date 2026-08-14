@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import HttpResponse, JsonResponse
 from django.urls import path, include
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -11,7 +12,26 @@ from rest_framework_simplejwt.views import (
 
 from accounts.views import analytics_overview
 
+
+def root_health(request):
+    """Root health endpoint so `/` and HEAD `/` return 200 instead of 404."""
+    return JsonResponse(
+        {
+            "service": "DeptDesk ERP API",
+            "status": "ok",
+            "api_root": "/api/",
+            "admin": "/admin/",
+        }
+    )
+
+
+def favicon(request):
+    return HttpResponse(status=204)
+
+
 urlpatterns = [
+    path("", root_health, name="root_health"),
+    path("favicon.ico", favicon, name="favicon"),
     path("admin/", admin.site.urls),
     # JWT auth endpoints
     path("api/auth/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
